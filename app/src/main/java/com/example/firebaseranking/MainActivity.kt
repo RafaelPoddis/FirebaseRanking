@@ -6,17 +6,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import androidx.appcompat.app.AlertDialog
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.firebaseranking.ui.theme.FirebaseRankingTheme
-import com.google.firebase.Firebase
+import androidx.compose.material3.AlertDialog
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -77,6 +69,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        textoRanking.setOnClickListener {
+            abrirSeletorRanking()
+        }
+
         carregarRanking(textoRanking)
     }
 
@@ -132,6 +128,98 @@ class MainActivity : ComponentActivity() {
             })
     }
 
+    private fun abrirSeletorRanking() {
+        if (pontuacoesCarregadas.isEmpty()) {
+            Toast.makeText(this, "Não há pontuações salvas!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val opcoes = pontuacoesCarregadas.map { item ->
+            "${item.pontuacao.nome} - ${item.pontuacao.pontos} pontos"
+        }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Escolha uma pontuacao:")
+            .setItems(opcoes) { _, index ->
+                val selecionada = pontuacoesCarregadas[index]
+                abrirAcoesPontuacao(selecionada)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun abrirAcoesPontuacao(pontuacao: PontuacaoComChave) {
+        AlertDialog.Builder(this)
+            .setTitle("O que deseja fazer?")
+            .setItems(arrayOf("Editar pontos", "Excluir pontuação")) {_, escolha ->
+                when(escolha){
+                    0 -> abrirEdicao(pontuacao)
+                    1 -> abrirExclusao(pontuacao)
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun abrirEdicao(pontuacao: PontuacaoComChave) {
+        val campoPontos = EditText(this).apply {
+            hint = "${pontuacao.pontuacao.pontos}"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText(pontuacao.pontuacao.pontos.toString())
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Editar pontos")
+            .setMessage("Digite a nova pontuação")
+            .setView(campoPontos)
+            .setPositiveButton("Salvar") {_, _ ->
+                val novosPontos = campoPontos.text.toString().toIntOrNull()
+
+                if (novosPontos == null || novosPontos < 0) {
+                    Toast.makeText(this, "Digite um valor maior ou igual a zero!", Toast.LENGTH_SHORT).show()
+                } else {
+                    salvarEdicao(pontuacao, novosPontos)
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun salvarEdicao(pontuacao: PontuacaoComChave, novosPontos: Int) {
+        reference
+            .child(pontuacao.chave)
+            .child("pontos")
+            .setValue(novosPontos)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Pontuação editada com sucesso!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { erro ->
+                errorMsg(erro.message)
+            }
+    }
+
+    private fun abrirExclusao(pontuacao: PontuacaoComChave){
+        AlertDialog.Builder(this)
+            .setTitle("Tem certeza que deseja excluir?")
+            .setMessage("${pontuacao.pontuacao.nome} - ${pontuacao.pontuacao.pontos} pontos")
+            .setPositiveButton("Sim") {_, _ ->
+                excluirPontos(pontuacao)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun excluirPontos(pontuacao: PontuacaoComChave) {
+        reference
+            .child(pontuacao.chave)
+            .removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Pontuação removida com sucesso!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { erro ->
+                errorMsg(erro.message)
+            }
+    }
     private fun errorMsg(mensagem: String?) {
         android.util.Log.e("Firebase", mensagem ?: "Ocorreu um erro")
         Toast.makeText(this, "Erro no firebase", Toast.LENGTH_SHORT).show()
