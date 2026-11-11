@@ -3,7 +3,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="5dp"
+    android:layout_margin="15dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditText
@@ -11,45 +11,74 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Digite seu nome"
+        android:layout_marginTop="50dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <Button
-        android:id="@+id/botaoAumentarPontos"
+    <TextView
+        android:id="@+id/textoPontos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Aumentar pontos"
-        app:layout_constraintTop_toBottomOf="@+id/nome"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:text="Pontuação: 0"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/botoes"
+        app:layout_constraintTop_toBottomOf="@+id/nome"/>
 
-    <Button
-        android:id="@+id/botaoDiminuirPontos"
+    <LinearLayout
+        android:id="@+id/botoes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Diminuir Pontos"
-        app:layout_constraintTop_toBottomOf="@+id/botaoAumentarPontos"
-        app:layout_constraintBottom_toTopOf="@+id/botaoSalvarPontos"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-    
-    <Button
-        android:id="@+id/botaoSalvarPontos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Salvar"
-        app:layout_constraintTop_toBottomOf="@+id/botaoDiminuirPontos"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/textoPontos"
         app:layout_constraintBottom_toTopOf="@+id/rankingText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/botaoAumentarPontos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Aumentar pontos"
+            android:layout_marginVertical="3dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/botaoDiminuirPontos"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <Button
+            android:id="@+id/botaoDiminuirPontos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Diminuir Pontos"
+            android:layout_marginVertical="3dp"
+            app:layout_constraintTop_toBottomOf="@+id/botaoAumentarPontos"
+            app:layout_constraintBottom_toTopOf="@+id/botaoSalvarPontos"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <Button
+            android:id="@+id/botaoSalvarPontos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvar"
+            android:layout_marginVertical="3dp"
+            app:layout_constraintTop_toBottomOf="@+id/botaoDiminuirPontos"
+            app:layout_constraintBottom_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/rankingText"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="450dp"
         android:text="Carregando ranking..."
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/botoes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
