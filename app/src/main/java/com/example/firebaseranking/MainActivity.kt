@@ -46,9 +46,9 @@ class MainActivity : ComponentActivity() {
 
         val botaoAumentarPontos = findViewById<Button>(R.id.botaoAumentarPontos)
         val botaoDiminuirPontos = findViewById<Button>(R.id.botaoDiminuirPontos)
-        val botaoSalvaPontos = findViewById<Button>(R.id.botaoSalvarPontos)
+        val botaoSalvarPontos = findViewById<Button>(R.id.botaoSalvarPontos)
 
-        val nome = findViewById<EditText>(R.id.nome)
+        val campoNome = findViewById<EditText>(R.id.nome)
         val textoRanking = findViewById<TextView>(R.id.rankingText)
         val pontosText = findViewById<TextView>(R.id.textoPontos)
 
@@ -67,7 +67,28 @@ class MainActivity : ComponentActivity() {
             pontosText.text = "Pontuação: $pontos"
         }
 
+        botaoSalvarPontos.setOnClickListener {
+            val nome = campoNome.text.toString().trim()
+
+            if (nome.isEmpty()){
+                campoNome.error = "DIGITE UM NOME!"
+            } else {
+                salvarPontos(nome)
+            }
+        }
+
         carregarRanking(textoRanking)
+    }
+
+    private fun salvarPontos(nome: String) {
+        val pontuacao = Pontuacao(nome, pontos)
+
+        reference.push()
+            .setValue(pontuacao)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Pontuação salva", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { erro -> errorMsg(erro.message) }
     }
 
     private fun carregarRanking(textoRanking: TextView){
