@@ -17,8 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.firebaseranking.ui.theme.FirebaseRankingTheme
 import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +36,8 @@ class MainActivity : ComponentActivity() {
     )
 
     private var pontos: Int = 0
+
+    private var pontuacoesCarregadas = emptyList<PontuacaoComChave>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,5 +66,53 @@ class MainActivity : ComponentActivity() {
             pontos--
             pontosText.text = "Pontuação: $pontos"
         }
+
+        carregarRanking(textoRanking)
+    }
+
+    private fun carregarRanking(textoRanking: TextView){
+        reference
+            .orderByChild("pontos")
+            .limitToLast(10)
+            .addValueEventListener(object: ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val lista = mutableListOf<PontuacaoComChave>()
+
+                    for (item in snapshot.children) {
+                        val chave = item.key
+                        val pontuacao = item.getValue(Pontuacao::class.java)
+
+                        if (chave != null && pontuacao != null) {
+                            lista.add(
+                                PontuacaoComChave(
+                                    chave = chave,
+                                    pontuacao = pontuacao
+                                )
+                            )
+                        }
+                    }
+                    lista.reverse()
+                    pontuacoesCarregadas = lista
+
+                    val linhas = lista.mapIndexed { index, item ->
+                        "${index+1}. ${item.pontuacao.nome} - ${item.pontuacao.pontos} pontos"
+                    }
+                    textoRanking.text = if(linhas.isEmpty()) {
+                        "Ainda não há pontuações!"
+                    } else {
+                        "Ranking:\n"+linhas.joinToString("\n")
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    textoRanking.text = "Erro ao carregar ranking!"
+                    errorMsg(error.message)
+                }
+            })
+    }
+
+    private fun errorMsg(mensagem: String?) {
+        android.util.Log.e("Firebase", mensagem ?: "Ocorreu um erro")
+        Toast.makeText(this, "Erro no firebase", Toast.LENGTH_SHORT).show()
     }
 }
